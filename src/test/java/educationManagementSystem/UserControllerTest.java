@@ -81,7 +81,7 @@ class UserControllerTest {
     @Test
     void deleteUser_Test() {
 
-        userRepository.deleteById(2L);
+        userRepository.deleteById(2);
         Mockito.verify(userRepository).findById(2);
 
     }
