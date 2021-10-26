@@ -1,8 +1,7 @@
 package educationManagementSystem.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import educationManagementSystem.model.user.User;
 import lombok.*;
 
 import javax.persistence.*;

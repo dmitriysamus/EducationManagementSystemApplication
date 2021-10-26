@@ -1,9 +1,8 @@
 package educationManagementSystem.controllers;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import educationManagementSystem.model.Role;
 import educationManagementSystem.model.Token;
-import educationManagementSystem.model.User;
+import educationManagementSystem.model.user.User;
 import educationManagementSystem.payload.responce.MessageResponse;
 import educationManagementSystem.repository.RoleRepository;
 import educationManagementSystem.repository.TokenRepository;
@@ -17,8 +16,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.*;
 

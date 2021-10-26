@@ -1,7 +1,7 @@
 package educationManagementSystem;
 
 import educationManagementSystem.controllers.AuthController;
-import educationManagementSystem.model.User;
+import educationManagementSystem.model.user.User;
 import educationManagementSystem.payload.responce.JwtResponse;
 import educationManagementSystem.repository.UserRepository;
 import educationManagementSystem.security.jwt.TokenUtils;

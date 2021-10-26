@@ -1,6 +1,6 @@
 package educationManagementSystem.security.jwt;
 
-import educationManagementSystem.model.User;
+import educationManagementSystem.model.user.User;
 import educationManagementSystem.payload.responce.MessageResponse;
 import educationManagementSystem.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

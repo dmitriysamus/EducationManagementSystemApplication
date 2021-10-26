@@ -1,11 +1,9 @@
 package educationManagementSystem;
 
-import educationManagementSystem.controllers.AuthController;
-import educationManagementSystem.controllers.TestController;
 import educationManagementSystem.controllers.UserController;
 import educationManagementSystem.model.ERole;
 import educationManagementSystem.model.Role;
-import educationManagementSystem.model.User;
+import educationManagementSystem.model.user.User;
 import educationManagementSystem.payload.responce.JwtResponse;
 import educationManagementSystem.repository.TokenRepository;
 import educationManagementSystem.repository.UserRepository;
@@ -15,17 +13,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -33,13 +27,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -164,8 +154,8 @@ class UserTest {
         mainRole.add(role_3);
         user.setRoles(mainRole);
 
-        Assert.assertTrue(user.getRoles().toString().contains("ROLE_ADMIN"));
-        Assert.assertTrue(user.getRoles().toString().contains("ROLE_TEACHER"));
-        Assert.assertTrue(user.getRoles().toString().contains("ROLE_USER"));
+        Assert.assertTrue(user.getRoles().contains(role_1));
+        Assert.assertTrue(user.getRoles().contains(role_2));
+        Assert.assertTrue(user.getRoles().contains(role_3));
     }
 }
