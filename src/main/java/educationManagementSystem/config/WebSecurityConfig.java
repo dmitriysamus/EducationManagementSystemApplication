@@ -1,5 +1,6 @@
-package educationManagementSystem.security;
+package educationManagementSystem.config;
 
+import educationManagementSystem.security.jwt.AuthEntryPointJwt;
 import educationManagementSystem.security.jwt.AuthTokenFilter;
 import educationManagementSystem.security.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +17,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import educationManagementSystem.security.jwt.AuthEntryPointJwt;
-
+/**
+ * Класс конфигурации доступа пользователей по адресам
+ * с контролем аутентификации и наличия валидного токена.
+ *
+ * @author habatoo
+ */
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(
-        // securedEnabled = true,
-        // jsr250Enabled = true,
         prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
@@ -52,6 +55,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Переопределение метода configure для настройки доступа по
+     * адресам /api/auth/** и /api/test/**
+     * @param http объект {@link HttpSecurity}
+     * @throws Exception
+     */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable()

@@ -9,7 +9,7 @@ import javax.validation.Valid;
 
 import educationManagementSystem.model.ERole;
 import educationManagementSystem.model.Role;
-import educationManagementSystem.model.User;
+import educationManagementSystem.model.user.User;
 import educationManagementSystem.payload.request.LoginRequest;
 import educationManagementSystem.payload.request.SignupRequest;
 import org.springframework.beans.factory.annotation.Autowired;

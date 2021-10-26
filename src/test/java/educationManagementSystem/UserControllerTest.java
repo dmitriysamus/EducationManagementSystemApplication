@@ -2,7 +2,7 @@ package educationManagementSystem;
 
 import educationManagementSystem.controllers.AuthController;
 import educationManagementSystem.controllers.TestController;
-import educationManagementSystem.model.User;
+import educationManagementSystem.model.user.User;
 import educationManagementSystem.repository.UserRepository;
 
 import org.junit.jupiter.api.AfterEach;

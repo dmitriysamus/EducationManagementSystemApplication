@@ -1,6 +1,7 @@
 spring:
   datasource:
-    url: jdbc:h2://mem:db;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:mem:db
+#    url: jdbc:h2://mem:db;DB_CLOSE_DELAY=-1 // spring.datasource.url=jdbc:h2:file:./data/demo
     username: sa
     password: sa
     driver-class-name: org.h2.Driver
@@ -12,3 +13,10 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+
+habatoo:
+  app:
+    jwtSecret: habatooSecretKeyhabatooSecretKeyhabatooSecretKeyhabatooSecretKeyhabatooSecretKeyhabatooSecretKey
+    jwtExpirationMs: 100500
+    secretKey: 1234567890123456789012345678901234567890
+    remoteAddr: 0:0:0:0:0:0:0:1
