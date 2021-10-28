@@ -1,4 +1,9 @@
+DELETE FROM groups_users;
 DELETE FROM user_roles;
+DELETE FROM teachers_groups;
+DELETE FROM admins;
+DELETE FROM groups;
+DELETE FROM teachers;
 DELETE FROM roles;
 DELETE FROM tokens;
 DELETE FROM users;
@@ -11,4 +16,6 @@ INSERT INTO users(id, username, email, password) VALUES
 (2, 'teacher', 'teacher@teacher.com', '$2a$10$7JGsM41kbXX7/vJ2lc3pb.wdoIoANWTme.NErCU2TSv1RcPnDaBaS'),
 (3, 'user', 'user@user.com', '$2a$10$7JGsM41kbXX7/vJ2lc3pb.wdoIoANWTme.NErCU2TSv1RcPnDaBaS');
 
+INSERT INTO user_roles VALUES
+(1, 1), (1, 2), (1, 3), (2, 2), (2, 3), (3, 3);
 --alter sequence users_id_seq restart with 10;

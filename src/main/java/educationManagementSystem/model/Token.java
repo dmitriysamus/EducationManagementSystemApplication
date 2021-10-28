@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
 public class Token {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "TOKEN_ID")
+    @Column(name = "ID")
     private Integer id;
 
     @Column(name = "TOKEN", nullable = false, unique = true, length = 500)

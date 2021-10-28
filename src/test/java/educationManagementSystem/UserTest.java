@@ -13,6 +13,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.junit.Assert;
 import org.junit.runner.RunWith;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -27,9 +29,12 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -72,9 +77,8 @@ class UserTest {
      */
     @BeforeEach
     void setUp() {
-
         username = "admin";
-        email = "test@test.com";
+        email = "admin@admin.com";
         password = "12345";
 
         User user = new User(
@@ -82,7 +86,6 @@ class UserTest {
                 email,
                 password
         );
-
     }
 
     /**
@@ -90,9 +93,7 @@ class UserTest {
      */
     @AfterEach
     void tearDown() {
-
         userRepository.deleteAll();
-
     }
 
     @Test
@@ -100,6 +101,27 @@ class UserTest {
         assertThat(userRepository).isNotNull();
         assertThat(userController).isNotNull();
         assertThat(tokenRepository).isNotNull();
+    }
+
+    @Test
+    public void createUserToken() {
+        User user = userRepository.findByUsername(username).get();
+        JwtResponse jwtResponse = tokenUtils.makeAuth(user.getUsername(), password);
+        tokenUtils.makeToken(username, jwtResponse.getAccessToken());
+
+        assertEquals(true, tokenRepository.existsByToken(jwtResponse.getAccessToken()));
+    }
+
+    @Test
+    void getUser_Test() {
+        userRepository.findById(1);
+        Mockito.verify(userRepository).findById(1);
+    }
+
+    @Test
+    void getAllUser_Test() {
+        userRepository.findAll();
+        Mockito.verify(userRepository).findAll();
     }
 
     @Test
@@ -157,5 +179,145 @@ class UserTest {
         Assert.assertTrue(user.getRoles().contains(role_1));
         Assert.assertTrue(user.getRoles().contains(role_2));
         Assert.assertTrue(user.getRoles().contains(role_3));
+    }
+
+    @Test
+    public void changeMyAdminData_Test() throws Exception{
+        String id = "1";
+        JwtResponse jwtResponse = tokenUtils.makeAuth(username, password);
+        tokenUtils.makeToken(username, jwtResponse.getAccessToken());
+
+        this.mockMvc.perform(put("/api/auth/users/" + id)
+                        .header("Authorization", "Bearer " + jwtResponse.getAccessToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"username\": \"admin2\", \"userEmail\": " +
+                                "\"admin2@admin2.com\", \"password\": \"12345\" }"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("message").value("User data was update successfully!"));
+
+    }
+
+    @Test
+    public void changeUserData_Test() throws Exception{
+        String id = "2";
+        JwtResponse jwtResponse = tokenUtils.makeAuth(username, password);
+        tokenUtils.makeToken(username, jwtResponse.getAccessToken());
+
+        this.mockMvc.perform(put("/api/auth/users/" + id)
+                        .header("Authorization", "Bearer " + jwtResponse.getAccessToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"username\": \"user2\", \"userEmail\": " +
+                                "\"user2@user2.com\", \"password\": \"12345\" }"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("message").value("User data was update successfully!"));
+    }
+
+    @Test
+    public void changeMyUserData_Test() throws Exception{
+        JwtResponse jwtResponse = tokenUtils.makeAuth("user", password);
+        tokenUtils.makeToken(username, jwtResponse.getAccessToken());
+
+        this.mockMvc.perform(put("/api/auth/users/3")
+                        .header("Authorization", "Bearer " + jwtResponse.getAccessToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"username\": \"user2\", \"userEmail\": " +
+                                "\"user2@user2.com\", \"password\": \"12345\" }"))
+                .andExpect(status().is(200))
+                .andExpect(jsonPath("message").value("User data was update successfully!"));
+
+    }
+
+    @Test
+    public void changeNotMyUserData_Test() throws Exception{
+        String id = "1";
+        JwtResponse jwtResponse = tokenUtils.makeAuth("user", password);
+        tokenUtils.makeToken(username, jwtResponse.getAccessToken());
+
+        this.mockMvc.perform(put("/api/auth/users/" + id)
+                        .header("Authorization", "Bearer " + jwtResponse.getAccessToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"userName\": \"admin2\", \"userEmail\": " +
+                                "\"admin2@admin2.com\", \"password\": \"12345\" }"))
+                .andExpect(status().is(400))
+                .andExpect(jsonPath("message").value("You can edit only yourself data."));
+    }
+
+    @Test
+    public void deleteUserByAdmin_Test() throws Exception{
+        String id = "2";
+        JwtResponse jwtResponse = tokenUtils.makeAuth(username, password);
+        tokenUtils.makeToken(username, jwtResponse.getAccessToken());
+
+        this.mockMvc.perform(delete("/api/auth/users/" + id)
+                        .header("Authorization", "Bearer " + jwtResponse.getAccessToken()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("message").value("User was deleted successfully!"));
+    }
+
+    @Test
+    public void failDeleteUserByUser_Test() throws Exception{
+        String id = "1";
+        JwtResponse jwtResponse = tokenUtils.makeAuth("user", password);
+        tokenUtils.makeToken(username, jwtResponse.getAccessToken());
+
+        this.mockMvc.perform(delete("/api/auth/users/" + id)
+                        .header("Authorization", "Bearer " + jwtResponse.getAccessToken()))
+                .andExpect(status().is(403));
+    }
+
+    @Test
+    public void showAllUsers_Test() throws Exception{
+        JwtResponse jwtResponse = tokenUtils.makeAuth(username, password);
+        tokenUtils.makeToken(username, jwtResponse.getAccessToken());
+        Date date = new Date();
+        String resp = "[{\"roles\":[{\"id\":1,\"mainRoleName\":\"ROLE_ADMIN\"},{\"id\":2,\"mainRoleName\":\"ROLE_MODERATOR\"},{\"id\":3,\"mainRoleName\":\"ROLE_USER\"}],\"userEmail\":\"admin@admin.com\",\"id\":1,\"creationDate\":\"" + date + "\",\"userName\":\"admin\"},{\"roles\":[{\"id\":2,\"mainRoleName\":\"ROLE_MODERATOR\"},{\"id\":3,\"mainRoleName\":\"ROLE_USER\"}],\"userEmail\":\"mod@mod.com\",\"id\":2,\"creationDate\":\"" + date + "\",\"userName\":\"mod\"},{\"roles\":[{\"id\":3,\"mainRoleName\":\"ROLE_USER\"}],\"userEmail\":\"user@user.com\",\"id\":3,\"creationDate\":\"" + date + "\",\"userName\":\"user\"}]";
+
+        this.mockMvc.perform(get("/api/auth/users/")
+                        .header("Authorization", "Bearer " + jwtResponse.getAccessToken()))
+                .andExpect(status().is(200))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON_VALUE))
+                .andReturn().getResponse().getContentAsString().equals(resp);
+    }
+
+    @Test
+    public void tokensDataCheck_Test() throws Exception{
+        JwtResponse jwtResponse = tokenUtils.makeAuth(username, password);
+        tokenUtils.makeToken(username, jwtResponse.getAccessToken());
+
+        this.mockMvc.perform(delete("/api/auth/users/tokens")
+                        .header("Authorization", "Bearer " + jwtResponse.getAccessToken()))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("message").value("All tokens have valid expiry date!"));
+    }
+
+    @Test
+    public void tokensDataClean_Test() throws Exception{
+        JwtResponse jwtResponse = tokenUtils.makeAuth(username, password);
+        tokenUtils.makeToken(username, jwtResponse.getAccessToken());
+
+        // Create old token
+        Assert.assertEquals(1, tokenRepository.findAll().size());
+        tokenUtils.makeOldToken(username, password);
+        Assert.assertEquals(2, tokenRepository.findAll().size());
+
+        this.mockMvc.perform(delete("/api/auth/users/tokens")
+                        .header("Authorization", "Bearer " + jwtResponse.getAccessToken()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("message").value(
+                        "Tokens with expiry date was deleted successfully!"));
+
+        Assert.assertEquals(1, tokenRepository.findAll().size());
+    }
+
+    @Test
+    public void showAllUsersRoles_Test() {
+        JwtResponse jwtResponse = tokenUtils.makeAuth(username, password);
+        tokenUtils.makeToken(username, jwtResponse.getAccessToken());
+
+        User user = userRepository.findByUsername(username).get();
+        Assert.assertTrue(user.getAuthorities().toString().contains("ROLE_ADMIN"));
+        Assert.assertTrue(user.getAuthorities().toString().contains("ROLE_TEACHER"));
+        Assert.assertTrue(user.getAuthorities().toString().contains("ROLE_USER"));
+
     }
 }

@@ -3,8 +3,10 @@ package educationManagementSystem.model.user;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
+import java.util.Collection;
 
 @Entity
 @Getter
@@ -17,7 +19,7 @@ import javax.persistence.*;
         })
 public class User extends AbstractUser {
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private Group group;
 
     public User(String username, String email, String password) {

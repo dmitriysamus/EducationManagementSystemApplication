@@ -1,6 +1,8 @@
 package educationManagementSystem;
 
 import educationManagementSystem.controllers.AuthController;
+import educationManagementSystem.model.ERole;
+import educationManagementSystem.model.Role;
 import educationManagementSystem.model.user.User;
 import educationManagementSystem.payload.responce.JwtResponse;
 import educationManagementSystem.repository.UserRepository;
@@ -18,6 +20,8 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -63,60 +67,59 @@ public class AuthTest {
     public void createAdmin_Test() throws Exception{
         this.mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{ \"userName\": \"testmod\", \"email\": \"testmod@mod.com\", \"password\": \"12345\", \"role\": [\"admin\", \"teacher\", \"user\"] }"))
+                        .content("{ \"username\": \"testmod\", \"email\": \"testmod@mod.com\", \"password\": \"12345\", \"role\": [\"admin\", \"teacher\", \"user\"] }"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("message").value("User registered successfully!"));
 
         User user = userRepository.findByUsername("testmod").get();
         JwtResponse jwtResponse = tokenUtils.makeAuth(user.getUsername(), password);
         tokenUtils.makeToken("testmod", jwtResponse.getAccessToken());
-        System.out.println("AuthTest.testCreateAdmin " + user.getRoles().toString());
-        Assert.assertTrue(user.getRoles().toString().contains("ROLE_ADMINISTRATOR"));
+        Assert.assertTrue(user.getRoles().toString().contains("ROLE_ADMIN"));
         Assert.assertTrue(user.getRoles().toString().contains("ROLE_USER"));
-        Assert.assertTrue(user.getRoles().toString().contains("ROLE_MODERATOR"));
+        Assert.assertTrue(user.getRoles().toString().contains("ROLE_TEACHER"));
         Assert.assertTrue(user.getEmail().contains("testmod@mod.com"));
     }
 
 
     @Test
-    public void testCreateUser_Test() throws Exception{
+    public void createUser_Test() throws Exception{
         this.mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{ \"userName\": \"guest\", \"email\": \"guest@guest.com\", \"password\": \"12345\", \"role\": [\"user\"] }"))
+                        .content("{ \"username\": \"guest\", \"email\": \"guest@guest.com\", \"password\": \"12345\", \"role\": [\"user\"] }"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("message").value("User registered successfully!"));
 
         User user = userRepository.findByUsername("guest").get();
         JwtResponse jwtResponse = tokenUtils.makeAuth(user.getUsername(), password);
         tokenUtils.makeToken("guest", jwtResponse.getAccessToken());
-        Assert.assertFalse(user.getRoles().toString().contains("ROLE_ADMINISTRATOR"));
+        Assert.assertFalse(user.getRoles().toString().contains("ROLE_ADMIN"));
         Assert.assertTrue(user.getRoles().toString().contains("ROLE_USER"));
-        Assert.assertFalse(user.getRoles().toString().contains("ROLE_MODERATOR"));
+        Assert.assertFalse(user.getRoles().toString().contains("ROLE_TEACHER"));
         Assert.assertTrue(user.getEmail().contains("guest@guest.com"));
     }
 
     @Test
-    public void testCreateAdminAndUser_Test() throws Exception{
+    public void createAdminAndUser_Test() throws Exception{
         this.mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{ \"userName\": \"admin2\", \"email\": \"admin2@admin2.com\", \"password\": \"12345\", \"role\": [\"admin\"] }"))
+                        .content("{ \"username\": \"admin2\", \"email\": \"admin2@admin2.com\", \"password\": \"12345\", \"role\": [\"admin\"] }"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("message").value("User registered successfully!"));
 
         User user = userRepository.findByUsername("admin2").get();
         JwtResponse jwtResponse = tokenUtils.makeAuth(user.getUsername(), password);
         tokenUtils.makeToken("admin2", jwtResponse.getAccessToken());
-        Assert.assertTrue(user.getRoles().toString().contains("ROLE_ADMINISTRATOR"));
+        Assert.assertTrue(user.getRoles().toString().contains("ROLE_ADMIN"));
         Assert.assertFalse(user.getRoles().toString().contains("ROLE_USER"));
-        Assert.assertFalse(user.getRoles().toString().contains("ROLE_MODERATOR"));
+        Assert.assertFalse(user.getRoles().toString().contains("ROLE_TEACHER"));
         Assert.assertTrue(user.getEmail().contains("admin2@admin2.com"));
     }
 
     @Test
-    public void testCreateUsernameInDb_Test() throws Exception{
+    public void createUsernameInDb_Test() throws Exception{
         this.mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{ \"userName\": \"admin\", \"email\": \"admin2@admin2.com\", \"password\": \"12345\", \"role\": [\"admin\"] }"))
+                        .content("{ \"username\": \"admin\", \"email\": \"admin2@admin2.com\", \"password\": \"12345\", \"role\": [\"admin\"] }"))
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("message").value("Error: Username is already taken!"));
     }
@@ -134,7 +137,7 @@ public class AuthTest {
     public void createRoleNotInDb_Test() throws Exception{
         this.mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{ \"userName\": \"cat\", \"email\": \"cat@cat.com\", \"password\": \"12345\", \"role\": [\"cat\"] }"))
+                        .content("{ \"username\": \"cat\", \"email\": \"cat@cat.com\", \"password\": \"12345\", \"role\": [\"cat\"] }"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("message").value("User registered successfully!"));
     }
@@ -143,7 +146,7 @@ public class AuthTest {
     public void failCreateUserWithoutAdminRole_Test() throws Exception{
         this.mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{ \"userName\": \"admin2\", \"email\": \"admin2@admin2.com\", \"password\": \"12345\", \"role\": [\"admin\"] }"))
+                        .content("{ \"username\": \"admin2\", \"email\": \"admin2@admin2.com\", \"password\": \"12345\", \"role\": [\"admin\"] }"))
                 .andExpect(status().is(200))
                 .andExpect(jsonPath("message").value("User registered successfully!"));
     }
@@ -152,33 +155,29 @@ public class AuthTest {
     public void loginForbiddenTest_Test() throws Exception{
         this.mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{ \"userName\": \"mod\", \"password\": \"123456\" }"))
+                        .content("{ \"username\": \"teacher\", \"password\": \"123456\" }"))
                 .andExpect(status().isUnauthorized());
-//                .andExpect(jsonPath("path").value(""))
-//                .andExpect(jsonPath("error").value("Unauthorized"))
-//                .andExpect(jsonPath("message").value("Bad credentials"))
-//                .andExpect(jsonPath("status").value(401));
     }
 
     @Test
     public void adminLogin_Test() throws Exception{
         this.mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{ \"userName\": \"admin\", \"password\": \"12345\" }"))
+                        .content("{ \"username\": \"admin\", \"password\": \"12345\" }"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userName").value("admin"))
-                .andExpect(jsonPath("$.userEmail").value("admin@admin.com"))
-                .andExpect((jsonPath("$.roles", Matchers.containsInAnyOrder("ROLE_ADMINISTRATOR","ROLE_TEACHER", "ROLE_USER"))));
+                .andExpect(jsonPath("$.username").value("admin"))
+                .andExpect(jsonPath("$.email").value("admin@admin.com"))
+                .andExpect((jsonPath("$.roles", Matchers.containsInAnyOrder("ROLE_ADMIN","ROLE_TEACHER", "ROLE_USER"))));
     }
 
     @Test
     public void userLogin_Test() throws Exception{
         this.mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{ \"userName\": \"user\", \"password\": \"12345\" }"))
+                        .content("{ \"username\": \"user\", \"password\": \"12345\" }"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userName").value("user"))
-                .andExpect(jsonPath("$.userEmail").value("user@user.com"))
+                .andExpect(jsonPath("$.username").value("user"))
+                .andExpect(jsonPath("$.email").value("user@user.com"))
                 .andExpect((jsonPath("$.roles", Matchers.containsInAnyOrder("ROLE_USER"))));
     }
 
@@ -188,10 +187,6 @@ public class AuthTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"token\": \"\" }"))
                 .andExpect(status().isUnauthorized());
-//                .andExpect(jsonPath("path").value(""))
-//                .andExpect(jsonPath("error").value("Unauthorized"))
-//                .andExpect(jsonPath("message").value("Full authentication is required to access this resource"))
-//                .andExpect(jsonPath("status").value(401));
 
     }
 
