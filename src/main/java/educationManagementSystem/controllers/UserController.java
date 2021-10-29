@@ -58,7 +58,7 @@ public class UserController {
      * @see Role
      */
     @GetMapping
-    @PreAuthorize("hasRole('ROLE_ADMINISTRATOR') or hasRole('ROLE_TEACHER')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_TEACHER')")
     @ResponseBody
     public ResponseEntity<?> userList() {
         List<Object> usersReturn = new ArrayList<>();
@@ -66,8 +66,8 @@ public class UserController {
         for(User user: usersCurrent) {
             Map<String, Object> temp = new HashMap<String, Object>();
             temp.put("roles", user.getRoles());
-            temp.put("userEmail", user.getEmail());
-            temp.put("userName", user.getUsername());
+            temp.put("email", user.getEmail());
+            temp.put("username", user.getUsername());
             temp.put("id", user.getId());
             usersReturn.add(temp);
         }
@@ -83,7 +83,7 @@ public class UserController {
      * @see UserRepository
      */
     @GetMapping("/getUserInfo")
-    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMINISTRATOR') or hasRole('ROLE_MODERATOR')")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_ADMIN') or hasRole('ROLE_TEACHER')")
     @ResponseBody
     public ResponseEntity<?>  getUserInfo(Authentication authentication) {
         Optional optionalUser = userRepository.findByUsername(authentication.getName());
@@ -105,7 +105,7 @@ public class UserController {
      * @see UserRepository
      */
     @PutMapping("{id}")
-    @PreAuthorize("hasRole('ROLE_ADMINISTRATOR') or hasRole('ROLE_MODERATOR') or hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_TEACHER') or hasRole('ROLE_USER')")
     public ResponseEntity<?> changeUser(
             @PathVariable("id") User userFromDb,
             @RequestBody User user,
@@ -134,7 +134,7 @@ public class UserController {
      * @see UserRepository
      */
     @DeleteMapping("{id}")
-    @PreAuthorize("hasRole('ROLE_ADMINISTRATOR') or hasRole('ROLE_MODERATOR')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> deleteUser(@PathVariable("id") User user) {
         try {
             userRepository.delete(user);
@@ -153,7 +153,7 @@ public class UserController {
      * @return {@code ResponseEntity.ok - Tokens with expiry date was deleted successfully!} - при успешном удалении токенов с истекшим сроком действия.
      */
     @DeleteMapping("/tokens")
-    @PreAuthorize("hasRole('ROLE_ADMINISTRATOR')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> clearTokens() {
 
         try {

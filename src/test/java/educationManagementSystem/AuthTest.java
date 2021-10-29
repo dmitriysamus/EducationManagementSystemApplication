@@ -1,15 +1,20 @@
 package educationManagementSystem;
 
 import educationManagementSystem.controllers.AuthController;
+import educationManagementSystem.controllers.UserController;
 import educationManagementSystem.model.ERole;
 import educationManagementSystem.model.Role;
+import educationManagementSystem.model.Token;
 import educationManagementSystem.model.user.User;
 import educationManagementSystem.payload.responce.JwtResponse;
+import educationManagementSystem.repository.TokenRepository;
 import educationManagementSystem.repository.UserRepository;
 import educationManagementSystem.security.jwt.TokenUtils;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +35,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
+/**
+ * Класс AuthTest проводит тестирование методов
+ * при создании нового объекта класса {@link User}
+ * методами класса {@link AuthController}.
+ */
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -58,11 +68,34 @@ public class AuthTest {
     String username = "admin";
     String password = "12345";
 
+    /**
+     * Очистка экземпляров тестируемого класса {@link User}.
+     */
+    @AfterEach
+    void tearDown() {
+        userRepository.deleteAll();
+    }
+
+    /**
+     * Метод тестирует инициализацию контекста.
+     * Сценарий проверяет успешность создания
+     * {@link AuthController}
+     * {@link UserRepository}
+     */
     @Test
     public void loadControllers() {
+        assertThat(userRepository).isNotNull();
         assertThat(authController).isNotNull();
     }
 
+    /**
+     * Метод тестирует создание объекта {@link User}.
+     * при запросе типа POST по адресу "/api/auth/register"
+     * Сценарий проверяет возможность создания пользователя с
+     * username: "testmod", email: "testmod@mod.com", password: "12345", role: ["admin", "teacher", "user"]
+     * пользователем с ролью (ROLE_ADMIN).
+     * возвращает сообщение "User registered successfully!"
+     */
     @Test
     public void createAdmin_Test() throws Exception{
         this.mockMvc.perform(post("/api/auth/register")
@@ -80,7 +113,14 @@ public class AuthTest {
         Assert.assertTrue(user.getEmail().contains("testmod@mod.com"));
     }
 
-
+    /**
+     * Метод тестирует создание объекта {@link User}.
+     * при запросе типа POST по адресу "/api/auth/register"
+     * Сценарий проверяет возможность создания пользователя с
+     * username: "guest", email: "guest@guest.com", password: "12345", role: ["user"]
+     * пользователем с ролью (ROLE_USER).
+     * возвращает сообщение "User registered successfully!"
+     */
     @Test
     public void createUser_Test() throws Exception{
         this.mockMvc.perform(post("/api/auth/register")
@@ -98,6 +138,14 @@ public class AuthTest {
         Assert.assertTrue(user.getEmail().contains("guest@guest.com"));
     }
 
+    /**
+     * Метод тестирует создание объекта {@link User}.
+     * при запросе типа POST по адресу "/api/auth/register"
+     * Сценарий проверяет возможность создания пользователя с
+     * username: "admin2", email: "admin2@admin2.com", password: "12345", role: ["admin"]
+     * пользователем с ролью (ROLE_ADMIN).
+     * возвращает сообщение "User registered successfully!"
+     */
     @Test
     public void createAdminAndUser_Test() throws Exception{
         this.mockMvc.perform(post("/api/auth/register")
@@ -115,6 +163,14 @@ public class AuthTest {
         Assert.assertTrue(user.getEmail().contains("admin2@admin2.com"));
     }
 
+    /**
+     * Метод тестирует создание объекта {@link User}.
+     * при запросе типа POST по адресу "/api/auth/register"
+     * Сценарий проверяет не возможность создания пользователя с
+     * username: "admin", email: "admin2@admin2.com", password: "12345", role: ["admin"]
+     * пользователем с ролью (ROLE_ADMIN) при наличии пользователя с данным username.
+     * возвращает сообщение "Error: Username is already taken!"
+     */
     @Test
     public void createUsernameInDb_Test() throws Exception{
         this.mockMvc.perform(post("/api/auth/register")
@@ -124,6 +180,14 @@ public class AuthTest {
                 .andExpect(jsonPath("message").value("Error: Username is already taken!"));
     }
 
+    /**
+     * Метод тестирует создание объекта {@link User}.
+     * при запросе типа POST по адресу "/api/auth/register"
+     * Сценарий проверяет не возможность создания пользователя с
+     * username: "admin2", email: "admin@admin.com", password: "12345", role: ["admin"]
+     * пользователем с ролью (ROLE_ADMIN) при наличии пользователя с данным email.
+     * возвращает сообщение "Error: Email is already in use!"
+     */
     @Test
     public void createEmailInDb_Test() throws Exception{
         this.mockMvc.perform(post("/api/auth/register")
@@ -133,6 +197,14 @@ public class AuthTest {
                 .andExpect(jsonPath("message").value("Error: Email is already in use!"));
     }
 
+    /**
+     * Метод тестирует создание объекта {@link User}.
+     * при запросе типа POST по адресу "/api/auth/register"
+     * Сценарий проверяет возможность создания пользователя с
+     * username: "cat", email: "cat@cat.com", password: "12345", role: ["cat"]
+     * с ролью кроме перечисленных в базе. Пользователь создается с ролью (ROLE_USER)
+     * возвращает сообщение "User registered successfully!"
+     */
     @Test
     public void createRoleNotInDb_Test() throws Exception{
         this.mockMvc.perform(post("/api/auth/register")
@@ -142,15 +214,14 @@ public class AuthTest {
                 .andExpect(jsonPath("message").value("User registered successfully!"));
     }
 
-    @Test
-    public void failCreateUserWithoutAdminRole_Test() throws Exception{
-        this.mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{ \"username\": \"admin2\", \"email\": \"admin2@admin2.com\", \"password\": \"12345\", \"role\": [\"admin\"] }"))
-                .andExpect(status().is(200))
-                .andExpect(jsonPath("message").value("User registered successfully!"));
-    }
-
+    /**
+     * Метод тестирует доступ при запросе типа POST
+     * по адресу "/api/auth/login" пользователя с не валидным
+     * username и password.
+     * Сценарий проверяет не возможность доступа не авторизованнного пользователя с
+     * username: "teacher", password: "123456"
+     * возвращает статус isUnauthorized.
+     */
     @Test
     public void loginForbiddenTest_Test() throws Exception{
         this.mockMvc.perform(post("/api/auth/login")
@@ -159,6 +230,14 @@ public class AuthTest {
                 .andExpect(status().isUnauthorized());
     }
 
+    /**
+     * Метод тестирует доступ при запросе типа POST
+     * по адресу "/api/auth/login" пользователя с валидным
+     * username и password.
+     * Сценарий проверяет возможность доступа авторизованнного пользователя с
+     * username: "admin", password: "12345" и с ролью (ROLE_ADMIN)
+     * возвращает статус isOk.
+     */
     @Test
     public void adminLogin_Test() throws Exception{
         this.mockMvc.perform(post("/api/auth/login")
@@ -170,6 +249,14 @@ public class AuthTest {
                 .andExpect((jsonPath("$.roles", Matchers.containsInAnyOrder("ROLE_ADMIN","ROLE_TEACHER", "ROLE_USER"))));
     }
 
+    /**
+     * Метод тестирует доступ при запросе типа POST
+     * по адресу "/api/auth/login" пользователя с валидным
+     * username и password.
+     * Сценарий проверяет возможность доступа авторизованнного пользователя с
+     * username: "user", password: "12345" и с ролью (ROLE_USER)
+     * возвращает статус isOk.
+     */
     @Test
     public void userLogin_Test() throws Exception{
         this.mockMvc.perform(post("/api/auth/login")
@@ -181,6 +268,13 @@ public class AuthTest {
                 .andExpect((jsonPath("$.roles", Matchers.containsInAnyOrder("ROLE_USER"))));
     }
 
+    /**
+     * Метод тестирует мето logout при запросе типа GET
+     * по адресу "/api/auth/logout" пользователя с валидным
+     * username и password.
+     * Сценарий проверяет выход пользователя и
+     * возвращает статус isUnauthorized.
+     */
     @Test
     public void logoutFail_Test() throws Exception {
         this.mockMvc.perform(get("/api/auth/logout")
@@ -191,7 +285,12 @@ public class AuthTest {
     }
 
     /**
-     * Проверка метода logout, для корректной проверки требует токена с активным статусом и не истекшим сроком
+     * Метод тестирует метод logout при запросе типа GET
+     * по адресу "/api/auth/logout" пользователя с валидным
+     * username и password и токен с активным статусом и не истекшим сроком
+     * Сценарий проверяет выход пользователя и
+     * возвращает статус и сообщение "You are logout."
+     *
      * @throws Exception
      */
     @Test

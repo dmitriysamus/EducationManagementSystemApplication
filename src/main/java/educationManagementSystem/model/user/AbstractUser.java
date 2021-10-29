@@ -33,7 +33,6 @@ import java.util.Set;
  * @param "token" - токен сессии пользователя
  * @see Token (токены пользователя).
  */
-
 @MappedSuperclass
 @Getter
 @Setter

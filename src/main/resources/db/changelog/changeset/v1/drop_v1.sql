@@ -1,0 +1,9 @@
+drop table if exists groups_users cascade;
+drop table if exists teachers_groups cascade;
+drop table if exists user_roles cascade;
+drop table if exists admins cascade;
+drop table if exists groups cascade;
+drop table if exists roles cascade;
+drop table if exists teachers cascade;
+drop table if exists tokens cascade;
+drop table if exists users cascade;
