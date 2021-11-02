@@ -1,9 +1,14 @@
 package educationManagementSystem.controllers;
 
+import educationManagementSystem.model.ERole;
 import educationManagementSystem.model.Role;
 import educationManagementSystem.model.Token;
+import educationManagementSystem.model.user.Group;
 import educationManagementSystem.model.user.User;
+import educationManagementSystem.payload.request.GroupRequest;
+import educationManagementSystem.payload.request.SignupRequest;
 import educationManagementSystem.payload.responce.MessageResponse;
+import educationManagementSystem.repository.GroupRepository;
 import educationManagementSystem.repository.RoleRepository;
 import educationManagementSystem.repository.TokenRepository;
 import educationManagementSystem.repository.UserRepository;
@@ -16,6 +21,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -33,13 +40,16 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
+    private final GroupRepository groupRepository;
 
     @Autowired
     public UserController(UserRepository userRepository,
-                          TokenRepository tokenRepository
+                          TokenRepository tokenRepository,
+                          GroupRepository groupRepository
     ) {
         this.userRepository = userRepository;
         this.tokenRepository = tokenRepository;
+        this.groupRepository = groupRepository;
     }
 
     @Autowired
@@ -181,4 +191,7 @@ public class UserController {
         }
 
     }
+
+
+
 }

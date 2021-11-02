@@ -9,10 +9,12 @@ import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Модель пользователя. Записывается в БД в таблицу с имененм users.
- * @author habatoo
+ * @author habatoo, dmitriysamus
  *
  * @param "id" - primary key таблицы users.
  * @param "username" - имя пользователя - предпоалагается строковоя переменная Имя + Фамилия.
@@ -35,8 +37,14 @@ import java.util.Collection;
         })
 public class User extends AbstractUser {
 
+    //Для user
     @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "GROUP_ID")
     private Group group;
+
+    //Для teacher
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
+    private Set<Group> groups = new HashSet<>();
 
     public User(String username, String email, String password) {
         super(username, email, password);

@@ -12,7 +12,7 @@ import java.util.Set;
 
 /**
  * Модель группы. Записывается в БД в таблицу с имененм groups
- * @author habatoo
+ * @author habatoo, dmitriysamus
  *
  * @param "id" - primary key таблицы groups.
  * @param "users" - пользователи в группе.
@@ -27,12 +27,16 @@ import java.util.Set;
 @Table(name = "groups")
 public class Group {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Integer groupNum;
+
+    @ManyToOne
+    @JoinColumn(name = "TEACHER_ID")
+    private User teacher;
 
     @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<User> users = new HashSet<>();
 
-    @ManyToOne
-    private Teacher teacher;
+    public Group(Integer groupNum) {
+        this.groupNum = groupNum;
+    }
 }

@@ -1,12 +1,15 @@
 DELETE FROM groups_users;
 DELETE FROM user_roles;
-DELETE FROM teachers_groups;
+DELETE FROM users_groups;
 DELETE FROM admins;
 DELETE FROM groups;
 DELETE FROM teachers;
 DELETE FROM roles;
 DELETE FROM tokens;
 DELETE FROM users;
+
+INSERT INTO groups(group_num) VALUES
+(999);
 
 INSERT INTO roles(id, name) VALUES
 (1, 'ROLE_ADMIN'), (2, 'ROLE_TEACHER'), (3, 'ROLE_USER');

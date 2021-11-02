@@ -3,7 +3,7 @@ server:
 
 spring:
   liquibase:
-    enabled: true
+    enabled: false #//!!!!
   datasource:
     url: jdbc:postgresql://localhost:5432/app?useSSL=false
     username: appuser
@@ -16,8 +16,8 @@ spring:
           use_jdbc_metadata_defaults: false
     database-platform: org.hibernate.dialect.PostgreSQL9Dialect
     hibernate:
-      ddl-auto: validate
-    show-sql: false
+      ddl-auto: create #//!!!!
+    show-sql: true
 
 habatoo:
   app:

@@ -1,9 +1,9 @@
-databaseChangeLog:
-  - include:
-      file: db/changelog/changeset/v1/drop_v1.sql
-  - include:
-      file: db/changelog/changeset/v1/create_v1.sql
-  - include:
-      file: db/changelog/changeset/v1/alter_v1.sql
-  - include:
-      file: db/changelog/changeset/v1/roles_v1.sql
+#databaseChangeLog:
+#  - include:
+#      file: db/changelog/changeset/v1/drop_v1.sql
+#  - include:
+#      file: db/changelog/changeset/v1/create_v1.sql
+#  - include:
+#      file: db/changelog/changeset/v1/alter_v1.sql
+#  - include:
+#      file: db/changelog/changeset/v1/roles_v1.sql

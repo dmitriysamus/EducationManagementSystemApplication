@@ -1,6 +1,6 @@
 DELETE FROM groups_users;
 DELETE FROM user_roles;
-DELETE FROM teachers_groups;
+DELETE FROM users_groups;
 DELETE FROM admins;
 DELETE FROM groups;
 DELETE FROM teachers;
