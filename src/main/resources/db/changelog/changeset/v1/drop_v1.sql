@@ -1,4 +1,5 @@
 drop table if exists groups_users cascade;
+drop table if exists users_groups cascade;
 drop table if exists teachers_groups cascade;
 drop table if exists user_roles cascade;
 drop table if exists admins cascade;

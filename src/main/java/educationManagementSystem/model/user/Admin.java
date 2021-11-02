@@ -10,11 +10,12 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Модель администратора. Записывается в БД в таблицу с имененм admins
  * реализует методы администрирования интерфейса {@link Administer}
- * @author habatoo
+ * @author habatoo, dmitriysamus
  *
  * @param "id" - primary key таблицы admins.
  * @param "username" - имя пользователя - предпоалагается строковоя переменная Имя + Фамилия.
@@ -44,11 +45,10 @@ public class Admin extends AbstractUser implements Administer{
          * Метод {@link Admin#createGroup} создает новую группу {@link Group}
          * и добавляет в нее пользователей List<User> users.
          *
-         * @param users пользователи для добавления в группу
-         * @param groupNum id группы
+         * @param groupNum номер группы
          */
         @Override
-        public void createGroup(List<User> users, Integer groupNum) {
+        public void createGroup(Integer groupNum) {
                 //Implementation
         }
 

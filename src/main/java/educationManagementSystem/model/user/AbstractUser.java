@@ -21,7 +21,7 @@ import java.util.Set;
 
 /**
  * Модель абстрактного пользователя. Записывается в БД в таблицу с имененм users.
- * @author habatoo
+ * @author habatoo, dmitriysamus
  *
  * @param "id" - primary key таблицы users.
  * @param "username" - имя пользователя - предпоалагается строковоя переменная Имя + Фамилия.

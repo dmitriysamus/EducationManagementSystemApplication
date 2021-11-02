@@ -5,6 +5,7 @@ import educationManagementSystem.model.Token;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -14,7 +15,7 @@ import java.util.Set;
 /**
  * Модель учителя. Записывается в БД в таблицу с имененм teachers
  * реализует методы обучения интерфейса {@link Teach}
- * @author habatoo
+ * @author habatoo, dmitriysamus
  *
  * @param "id" - primary key таблицы teachers.
  * @param "username" - имя пользователя - предпоалагается строковоя переменная Имя + Фамилия.
