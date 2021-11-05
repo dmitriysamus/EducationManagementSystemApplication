@@ -1,12 +1,8 @@
 package educationManagementSystem.controllers;
 
-import educationManagementSystem.model.ERole;
 import educationManagementSystem.model.Role;
 import educationManagementSystem.model.Token;
-import educationManagementSystem.model.user.Group;
 import educationManagementSystem.model.user.User;
-import educationManagementSystem.payload.request.GroupRequest;
-import educationManagementSystem.payload.request.SignupRequest;
 import educationManagementSystem.payload.responce.MessageResponse;
 import educationManagementSystem.repository.GroupRepository;
 import educationManagementSystem.repository.RoleRepository;
@@ -21,8 +17,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.*;
 

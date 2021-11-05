@@ -1,6 +1,6 @@
 package educationManagementSystem.repository;
 
-import educationManagementSystem.model.user.Group;
+import educationManagementSystem.model.education.Group;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

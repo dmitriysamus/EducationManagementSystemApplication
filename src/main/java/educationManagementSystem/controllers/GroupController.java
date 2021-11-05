@@ -2,9 +2,8 @@ package educationManagementSystem.controllers;
 
 import educationManagementSystem.model.ERole;
 import educationManagementSystem.model.Role;
-import educationManagementSystem.model.user.Group;
+import educationManagementSystem.model.education.Group;
 import educationManagementSystem.model.user.User;
-import educationManagementSystem.payload.request.SignupRequest;
 import educationManagementSystem.payload.responce.MessageResponse;
 import educationManagementSystem.repository.GroupRepository;
 import educationManagementSystem.repository.TokenRepository;

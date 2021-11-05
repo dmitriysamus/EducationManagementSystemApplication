@@ -2,6 +2,7 @@ package educationManagementSystem.model.user;
 
 import educationManagementSystem.model.Role;
 import educationManagementSystem.model.Token;
+import educationManagementSystem.model.education.Grade;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -36,6 +37,9 @@ import java.util.Set;
                 @UniqueConstraint(columnNames = "email")
         })
 public class User extends AbstractUser {
+
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
+    private Set<Grade> grades = new HashSet<>();
 
     public User(String username, String email, String password) {
         super(username, email, password);

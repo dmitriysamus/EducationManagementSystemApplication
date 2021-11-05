@@ -1,16 +1,11 @@
 package educationManagementSystem.model.user;
 
+import educationManagementSystem.model.education.Group;
 import educationManagementSystem.model.Role;
 import educationManagementSystem.model.Token;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Модель администратора. Записывается в БД в таблицу с имененм admins

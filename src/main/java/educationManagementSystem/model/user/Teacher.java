@@ -1,5 +1,6 @@
 package educationManagementSystem.model.user;
 
+import educationManagementSystem.model.education.Group;
 import educationManagementSystem.model.Role;
 import educationManagementSystem.model.Token;
 import lombok.Getter;
@@ -30,10 +31,7 @@ import java.util.Set;
 @NoArgsConstructor
 public class Teacher extends AbstractUser implements Teach {
 
-        @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
-        private Set<Group> groups = new HashSet<>();
-
-        public Teacher(String username, String email, String password) {
+       public Teacher(String username, String email, String password) {
                 super(username, email, password);
         }
 

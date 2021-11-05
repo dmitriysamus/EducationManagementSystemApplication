@@ -1,7 +1,7 @@
-package educationManagementSystem.model.user;
+package educationManagementSystem.model.education;
 
-import educationManagementSystem.model.Role;
-import educationManagementSystem.model.Token;
+import educationManagementSystem.model.user.Teacher;
+import educationManagementSystem.model.user.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -35,6 +35,9 @@ public class Group {
 
     @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<User> users = new HashSet<>();
+
+    @OneToOne(fetch = FetchType.EAGER, orphanRemoval = true)
+    private Journal journal;
 
     public Group(Integer groupNum) {
         this.groupNum = groupNum;

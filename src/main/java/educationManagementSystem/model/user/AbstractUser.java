@@ -1,6 +1,7 @@
 package educationManagementSystem.model.user;
 
 import com.fasterxml.jackson.annotation.*;
+import educationManagementSystem.model.education.Group;
 import educationManagementSystem.model.Role;
 import educationManagementSystem.model.Token;
 import lombok.EqualsAndHashCode;
