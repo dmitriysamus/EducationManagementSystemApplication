@@ -27,4 +27,9 @@ public class Grade {
 
     @ManyToOne(fetch = FetchType.EAGER)
     private User student;
+
+    public Grade(EGrade name, User student) {
+        this.name = name;
+        this.student = student;
+    }
 }

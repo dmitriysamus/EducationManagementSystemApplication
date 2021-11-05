@@ -21,6 +21,8 @@ public class Lesson {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    private String name;
+
     @ManyToOne(fetch = FetchType.EAGER)
     private Journal journal;
 
@@ -33,4 +35,8 @@ public class Lesson {
 
     @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<Grade> grades = new HashSet<>();
+
+    public Lesson(String name) {
+        this.name = name;
+    }
 }

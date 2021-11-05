@@ -21,4 +21,8 @@ public class Task {
 
     @ManyToOne(fetch = FetchType.EAGER)
     private Lesson lesson;
+
+    public Task(String description) {
+        this.description = description;
+    }
 }

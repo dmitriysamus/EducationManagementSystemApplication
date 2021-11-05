@@ -2,16 +2,20 @@ package educationManagementSystem.controllers;
 
 import educationManagementSystem.model.ERole;
 import educationManagementSystem.model.Role;
-import educationManagementSystem.model.education.Group;
+import educationManagementSystem.model.education.*;
 import educationManagementSystem.model.user.User;
+import educationManagementSystem.payload.request.GradeRequest;
+import educationManagementSystem.payload.request.LessonRequest;
 import educationManagementSystem.payload.responce.MessageResponse;
 import educationManagementSystem.repository.GroupRepository;
+import educationManagementSystem.repository.LessonRepository;
 import educationManagementSystem.repository.TokenRepository;
 import educationManagementSystem.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Set;
 
 /**
@@ -27,11 +31,13 @@ public class GroupController {
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
     private final GroupRepository groupRepository;
+    private final LessonRepository lessonRepository;
 
-    public GroupController(UserRepository userRepository, TokenRepository tokenRepository, GroupRepository groupRepository) {
+    public GroupController(UserRepository userRepository, TokenRepository tokenRepository, GroupRepository groupRepository, LessonRepository lessonRepository) {
         this.userRepository = userRepository;
         this.tokenRepository = tokenRepository;
         this.groupRepository = groupRepository;
+        this.lessonRepository = lessonRepository;
     }
 
     /**
@@ -211,4 +217,122 @@ public class GroupController {
 
     }
 
+    @PostMapping("{groupNum}/lesson")
+    public ResponseEntity<?> createLesson (@PathVariable("groupNum") Integer groupNum, @Valid @RequestBody LessonRequest lessonRequest) {
+
+        if (!groupRepository.existsById(groupNum)) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Group does not exist!"));
+        }
+
+        Group group = groupRepository.findById(groupNum).get();
+        Lesson lesson = new Lesson(lessonRequest.getName());
+        Set<Lesson> lessons = group.getJournal().getLessons();
+
+        Boolean counter = false;
+        for (Lesson les: lessons) {
+            if (les.getName().equals(lesson.getName())) {
+                counter = true;
+                break;
+            }
+        }
+
+        if (counter) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Lesson exists in the group!"));
+        }
+
+        lessons.add(lesson);
+        group.getJournal().setLessons(lessons);
+        groupRepository.save(group);
+        return ResponseEntity.ok(new MessageResponse("Lesson created successfully!"));
+    }
+
+    @PostMapping("lessons/{lessonId}")
+    public ResponseEntity<?> createTask (@PathVariable("lessonId") Integer lessonId,
+                                         @Valid @RequestBody LessonRequest lessonRequest) {
+
+        if (!lessonRepository.existsById(lessonId)) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Lesson does not exist!"));
+        }
+
+        Lesson lesson = lessonRepository.findById(lessonId).get();
+
+        Set<Task> tasks = lesson.getTasks();
+
+        tasks.add(new Task(lessonRequest.getName()));
+
+        lesson.setTasks(tasks);
+
+        lessonRepository.save(lesson);
+
+        return ResponseEntity.ok(new MessageResponse("Task created successfully!"));
+    }
+
+    @PostMapping("rate/{lessonId}")
+    public ResponseEntity<?> rateStudent (@PathVariable("lessonId") Integer lessonId,
+                                         @Valid @RequestBody GradeRequest gradeRequest) {
+
+        if (!lessonRepository.existsById(lessonId)) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Lesson does not exist!"));
+        }
+
+        if (userRepository.existsById(gradeRequest.getStudentId())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: User does not exist!"));
+        }
+
+        User student = userRepository.findById(gradeRequest.getStudentId()).get();
+        Lesson lesson = lessonRepository.findById(lessonId).get();
+
+        Set<User> students = lesson.getJournal().getGroup().getUsers();
+
+        Boolean counter = false;
+        for (User user: students) {
+            if (student.getId().equals(gradeRequest.getStudentId())) {
+                counter = true;
+                break;
+            }
+        }
+
+        if (!counter) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Error: Student does not exists in the group!"));
+        }
+
+        Set<Grade> grades = lesson.getGrades();
+
+        Grade grade = new Grade();
+
+        switch (gradeRequest.getGrade()) {
+            case "pass":
+                grade.setName(EGrade.PASS);
+                break;
+            case "fail":
+                grade.setName(EGrade.FAIL);
+                break;
+            default:
+                return ResponseEntity
+                        .badRequest()
+                        .body(new MessageResponse("Error: Incorrect grade!"));
+        }
+
+        grade.setStudent(student);
+
+        grades.add(grade);
+
+        lesson.setGrades(grades);
+
+        lessonRepository.save(lesson);
+
+        return ResponseEntity.ok(new MessageResponse("Student rated successfully!"));
+    }
 }
