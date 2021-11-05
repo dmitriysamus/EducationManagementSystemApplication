@@ -75,6 +75,15 @@ public abstract class AbstractUser implements Serializable, UserDetails {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime lastVisitedDate;
 
+    //Для user
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "GROUP_ID")
+    private Group group;
+
+    //Для teacher
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
+    private Set<Group> groups = new HashSet<>();
+
     public AbstractUser() {
     }
 

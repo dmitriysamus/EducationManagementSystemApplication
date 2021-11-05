@@ -37,15 +37,6 @@ import java.util.Set;
         })
 public class User extends AbstractUser {
 
-    //Для user
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "GROUP_ID")
-    private Group group;
-
-    //Для teacher
-    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
-    private Set<Group> groups = new HashSet<>();
-
     public User(String username, String email, String password) {
         super(username, email, password);
     }
