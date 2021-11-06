@@ -2,8 +2,12 @@ package educationManagementSystem;
 
 import educationManagementSystem.controllers.GroupController;
 import educationManagementSystem.controllers.UserController;
+import educationManagementSystem.model.education.Grade;
 import educationManagementSystem.model.education.Group;
 
+import educationManagementSystem.model.education.Lesson;
+import educationManagementSystem.model.education.Task;
+import educationManagementSystem.model.user.User;
 import educationManagementSystem.payload.responce.JwtResponse;
 import educationManagementSystem.repository.GroupRepository;
 import educationManagementSystem.repository.LessonRepository;
@@ -84,6 +88,7 @@ class GroupTest {
      */
     @AfterEach
     void tearDown() {
+        lessonRepository.deleteAll();
         groupRepository.deleteAll();
     }
 
@@ -154,7 +159,9 @@ class GroupTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("message").value("Teacher added successfully!"));
 
-        Assert.assertEquals(2, groupRepository.findById(999).get().getTeacher().getId().longValue());
+        Group group = groupRepository.findById(999).get();
+
+        Assert.assertEquals(2, group.getTeacher().getId().intValue());
     }
 
     /**
@@ -195,11 +202,15 @@ class GroupTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("message").value("Student deleted successfully!"));
 
-        Assert.assertFalse(groupRepository.findById(999).get().getUsers().contains(userRepository.findById(3).get()));
+        Assert.assertEquals("[]", groupRepository.findById(999).get().getUsers().toString());
     }
 
+    /**
+     * Метод тестирует создание объекта {@link Lesson}, объекта {@link Task} и объекта {@link Grade}
+     * Сценарий проверяет успешность создания объектов.
+     */
     @Test
-    public void createLesson_Test() throws Exception {
+    public void createLesson_createTask_rateStudent_Test() throws Exception {
 
         JwtResponse jwtResponse = tokenUtils.makeAuth(usernameAdmin, passwordAdmin);
         tokenUtils.makeToken(usernameAdmin, jwtResponse.getAccessToken());
@@ -211,8 +222,42 @@ class GroupTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("message").value("Lesson created successfully!"));
 
-        Assert.assertEquals("Lesson Test", groupRepository.findById(999).get().getJournal().getLessons().stream().findFirst().get().getName());
-        Assert.assertEquals(999, lessonRepository.findByName("Lesson Test").get().getJournal().getGroup().getGroupNum().intValue());
-    }
+        Assert.assertEquals("Lesson Test",
+                groupRepository.findById(999).get().getJournal().getLessons().stream().findFirst().get().getName());
+        Assert.assertEquals(999,
+                lessonRepository.findByName("Lesson Test").get().getJournal().getGroup().getGroupNum().intValue());
 
+        this.mockMvc.perform(post("/api/auth/groups/lessons/" +
+                groupRepository.findById(999).get().getJournal().getLessons().stream().findFirst().get().getId())
+                .header("Authorization", "Bearer " + jwtResponse.getAccessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"name\": \"Task Test\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("message").value("Task created successfully!"));
+
+        Assert.assertEquals("Task Test",
+                groupRepository.findById(999).get().getJournal().getLessons().stream().findFirst().get().getTasks().stream().findFirst().get().getDescription());
+        Assert.assertEquals(999,
+                lessonRepository.findByName("Lesson Test").get().getTasks().stream().findFirst().get()
+                        .getLesson().getJournal().getGroup().getGroupNum().intValue());
+
+        Group group = lessonRepository.findByName("Lesson Test").get().getJournal().getGroup();
+        User user = userRepository.findById(3).get();
+        group.addUser(user);
+        groupRepository.save(group);
+        userRepository.save(user);
+
+        this.mockMvc.perform(post("/api/auth/groups/rate/" +
+                groupRepository.findById(999).get().getJournal().getLessons().stream().findFirst().get().getId())
+                .header("Authorization", "Bearer " + jwtResponse.getAccessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"grade\": \"pass\"," +
+                        "\"student\": 3}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("message").value("Student rated successfully!"));
+
+
+        Assert.assertEquals("PASS",
+                userRepository.findById(3).get().getGrades().stream().findFirst().get().getName().toString());
+    }
 }

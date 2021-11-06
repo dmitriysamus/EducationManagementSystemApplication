@@ -33,10 +33,10 @@ public class Group {
     @JoinColumn(name = "TEACHER_ID")
     private User teacher;
 
-    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = {CascadeType.ALL})
     private Set<User> users = new HashSet<>();
 
-    @OneToOne(fetch = FetchType.EAGER, orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @OneToOne(fetch = FetchType.EAGER, orphanRemoval = true, cascade = {CascadeType.ALL})
     private Journal journal;
 
     public Group(Integer groupNum) {
@@ -47,4 +47,10 @@ public class Group {
         this.journal = journal;
         journal.setGroup(this);
     }
+
+    public void addUser (User user) {
+        this.users.add(user);
+        user.setGroup(this);
+    }
+
  }

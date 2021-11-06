@@ -1,14 +1,15 @@
 package educationManagementSystem.payload.request;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 public class GradeRequest {
 
     @NotBlank
     String grade;
 
-    @NotBlank
-    Integer studentId;
+    @NotNull
+    Integer student;
 
     public String getGrade() {
         return grade;
@@ -18,11 +19,11 @@ public class GradeRequest {
         this.grade = grade;
     }
 
-    public Integer getStudentId() {
-        return studentId;
+    public Integer getStudent() {
+        return student;
     }
 
-    public void setStudentId(Integer studentId) {
-        this.studentId = studentId;
+    public void setStudent(Integer student) {
+        this.student = student;
     }
 }

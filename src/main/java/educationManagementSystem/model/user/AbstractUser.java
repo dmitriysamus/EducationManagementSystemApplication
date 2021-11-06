@@ -43,23 +43,23 @@ public abstract class AbstractUser implements Serializable, UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    Integer id;
 
     @NotBlank
-    private String username;
+    String username;
 
     @NotBlank
     @Email
-    private String email;
+    String email;
 
     @NotBlank
-    private String password;
+    String password;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles = new HashSet<>();
+    Set<Role> roles = new HashSet<>();
 
     @OneToMany(mappedBy = "userTokens", fetch = FetchType.EAGER, orphanRemoval = true)
     @JsonIdentityReference
@@ -67,14 +67,14 @@ public abstract class AbstractUser implements Serializable, UserDetails {
             generator = ObjectIdGenerators.PropertyGenerator.class,
             property = "id")
     @Column(name="USER_TOKENS")
-    private Set<Token> tokens = new HashSet<>();
+    Set<Token> tokens = new HashSet<>();
 
     @Column(name="USER_CREATION_DATE", updatable = false)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime creationDate;
+    LocalDateTime creationDate;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime lastVisitedDate;
+    LocalDateTime lastVisitedDate;
 
     //Для user
     @ManyToOne(fetch = FetchType.EAGER)
@@ -82,8 +82,8 @@ public abstract class AbstractUser implements Serializable, UserDetails {
     private Group group;
 
     //Для teacher
-    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
-    private Set<Group> groups = new HashSet<>();
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = {CascadeType.ALL})
+    Set<Group> groups = new HashSet<>();
 
     public AbstractUser() {
     }

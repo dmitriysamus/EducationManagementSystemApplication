@@ -3,6 +3,7 @@ package educationManagementSystem.model.user;
 import educationManagementSystem.model.Role;
 import educationManagementSystem.model.Token;
 import educationManagementSystem.model.education.Grade;
+import educationManagementSystem.model.education.Group;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -38,11 +39,20 @@ import java.util.Set;
         })
 public class User extends AbstractUser {
 
-    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = {CascadeType.ALL})
     private Set<Grade> grades = new HashSet<>();
 
     public User(String username, String email, String password) {
         super(username, email, password);
     }
 
+    public void addGrade (Grade grade) {
+        this.grades.add(grade);
+        grade.setStudent(this);
+    }
+
+    public void addGroup (Group group) {
+        this.groups.add(group);
+        group.setTeacher(this);
+    }
 }
