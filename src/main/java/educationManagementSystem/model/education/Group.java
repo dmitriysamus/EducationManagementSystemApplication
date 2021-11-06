@@ -1,7 +1,7 @@
-package educationManagementSystem.model.user;
+package educationManagementSystem.model.education;
 
-import educationManagementSystem.model.Role;
-import educationManagementSystem.model.Token;
+import educationManagementSystem.model.user.Teacher;
+import educationManagementSystem.model.user.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -33,10 +33,24 @@ public class Group {
     @JoinColumn(name = "TEACHER_ID")
     private User teacher;
 
-    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = {CascadeType.ALL})
     private Set<User> users = new HashSet<>();
+
+    @OneToOne(fetch = FetchType.EAGER, orphanRemoval = true, cascade = {CascadeType.ALL})
+    private Journal journal;
 
     public Group(Integer groupNum) {
         this.groupNum = groupNum;
     }
-}
+
+    public void addJournal (Journal journal) {
+        this.journal = journal;
+        journal.setGroup(this);
+    }
+
+    public void addUser (User user) {
+        this.users.add(user);
+        user.setGroup(this);
+    }
+
+ }

@@ -2,6 +2,8 @@ package educationManagementSystem.model.user;
 
 import educationManagementSystem.model.Role;
 import educationManagementSystem.model.Token;
+import educationManagementSystem.model.education.Grade;
+import educationManagementSystem.model.education.Group;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -37,17 +39,20 @@ import java.util.Set;
         })
 public class User extends AbstractUser {
 
-    //Для user
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "GROUP_ID")
-    private Group group;
-
-    //Для teacher
-    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
-    private Set<Group> groups = new HashSet<>();
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = {CascadeType.ALL})
+    private Set<Grade> grades = new HashSet<>();
 
     public User(String username, String email, String password) {
         super(username, email, password);
     }
 
+    public void addGrade (Grade grade) {
+        this.grades.add(grade);
+        grade.setStudent(this);
+    }
+
+    public void addGroup (Group group) {
+        this.groups.add(group);
+        group.setTeacher(this);
+    }
 }

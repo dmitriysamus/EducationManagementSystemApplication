@@ -1,15 +1,14 @@
 package educationManagementSystem.model.user;
 
+import educationManagementSystem.model.education.Group;
 import educationManagementSystem.model.Role;
 import educationManagementSystem.model.Token;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -27,21 +26,12 @@ import java.util.Set;
  * @param "token" - токен сессии пользователя
  * @see Token (токены пользователя).
  */
-@Entity
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(	name = "teachers",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = "username"),
-                @UniqueConstraint(columnNames = "email")
-        })
 public class Teacher extends AbstractUser implements Teach {
 
-        @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
-        private Set<Group> groups = new HashSet<>();
-
-        public Teacher(String username, String email, String password) {
+       public Teacher(String username, String email, String password) {
                 super(username, email, password);
         }
 
