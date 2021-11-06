@@ -1,0 +1,15 @@
+drop table if exists grades cascade
+drop table if exists groups cascade
+drop table if exists groups_users cascade
+drop table if exists journals cascade
+drop table if exists journals_lessons cascade
+drop table if exists lessons cascade
+drop table if exists lessons_grades cascade
+drop table if exists lessons_tasks cascade
+drop table if exists roles cascade
+drop table if exists tasks cascade
+drop table if exists tokens cascade
+drop table if exists user_roles cascade
+drop table if exists users cascade
+drop table if exists users_grades cascade
+drop table if exists users_groups cascade
