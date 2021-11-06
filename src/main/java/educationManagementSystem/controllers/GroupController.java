@@ -7,15 +7,13 @@ import educationManagementSystem.model.user.User;
 import educationManagementSystem.payload.request.GradeRequest;
 import educationManagementSystem.payload.request.LessonRequest;
 import educationManagementSystem.payload.responce.MessageResponse;
-import educationManagementSystem.repository.GroupRepository;
-import educationManagementSystem.repository.LessonRepository;
-import educationManagementSystem.repository.TokenRepository;
-import educationManagementSystem.repository.UserRepository;
+import educationManagementSystem.repository.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -32,12 +30,18 @@ public class GroupController {
     private final TokenRepository tokenRepository;
     private final GroupRepository groupRepository;
     private final LessonRepository lessonRepository;
+    private final JournalRepository journalRepository;
 
-    public GroupController(UserRepository userRepository, TokenRepository tokenRepository, GroupRepository groupRepository, LessonRepository lessonRepository) {
+    public GroupController(UserRepository userRepository,
+                           TokenRepository tokenRepository,
+                           GroupRepository groupRepository,
+                           LessonRepository lessonRepository,
+                           JournalRepository journalRepository) {
         this.userRepository = userRepository;
         this.tokenRepository = tokenRepository;
         this.groupRepository = groupRepository;
         this.lessonRepository = lessonRepository;
+        this.journalRepository = journalRepository;
     }
 
     /**
@@ -218,6 +222,7 @@ public class GroupController {
     }
 
     @PostMapping("{groupNum}/lesson")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<?> createLesson (@PathVariable("groupNum") Integer groupNum, @Valid @RequestBody LessonRequest lessonRequest) {
 
         if (!groupRepository.existsById(groupNum)) {
@@ -228,29 +233,39 @@ public class GroupController {
 
         Group group = groupRepository.findById(groupNum).get();
         Lesson lesson = new Lesson(lessonRequest.getName());
-        Set<Lesson> lessons = group.getJournal().getLessons();
+        Set<Lesson> lessons = new HashSet<>();
 
-        Boolean counter = false;
-        for (Lesson les: lessons) {
-            if (les.getName().equals(lesson.getName())) {
-                counter = true;
-                break;
+        if (group.getJournal() != null) {
+            if (group.getJournal().getLessons().iterator().hasNext()) {
+                lessons.addAll(group.getJournal().getLessons());
+                Boolean counter = false;
+                for (Lesson les: lessons) {
+                    if (les.getName().equals(lesson.getName())) {
+                        counter = true;
+                        break;
+                    }
+                }
+
+                if (counter) {
+                    return ResponseEntity
+                            .badRequest()
+                            .body(new MessageResponse("Error: Lesson exists in the group!"));
+                }
             }
+        } else {
+            group.addJournal(new Journal());
         }
 
-        if (counter) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Lesson exists in the group!"));
-        }
+        group.getJournal().addLesson(lesson);
 
-        lessons.add(lesson);
-        group.getJournal().setLessons(lessons);
         groupRepository.save(group);
+
         return ResponseEntity.ok(new MessageResponse("Lesson created successfully!"));
     }
 
+    //have to be rewrite (set to add)
     @PostMapping("lessons/{lessonId}")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<?> createTask (@PathVariable("lessonId") Integer lessonId,
                                          @Valid @RequestBody LessonRequest lessonRequest) {
 
@@ -273,7 +288,9 @@ public class GroupController {
         return ResponseEntity.ok(new MessageResponse("Task created successfully!"));
     }
 
+    //have to be rewrite (set to add)
     @PostMapping("rate/{lessonId}")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
     public ResponseEntity<?> rateStudent (@PathVariable("lessonId") Integer lessonId,
                                          @Valid @RequestBody GradeRequest gradeRequest) {
 

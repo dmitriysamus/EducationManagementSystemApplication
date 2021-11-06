@@ -6,6 +6,7 @@ import educationManagementSystem.model.education.Group;
 
 import educationManagementSystem.payload.responce.JwtResponse;
 import educationManagementSystem.repository.GroupRepository;
+import educationManagementSystem.repository.LessonRepository;
 import educationManagementSystem.repository.UserRepository;
 import educationManagementSystem.security.jwt.TokenUtils;
 import org.junit.Assert;
@@ -16,6 +17,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -44,6 +46,9 @@ class GroupTest {
 
     @Autowired
     private GroupController groupController;
+
+    @Autowired
+    private LessonRepository lessonRepository;
 
     @Autowired
     TokenUtils tokenUtils;
@@ -94,6 +99,7 @@ class GroupTest {
         assertThat(userRepository).isNotNull();
         assertThat(groupController).isNotNull();
         assertThat(groupRepository).isNotNull();
+        assertThat(lessonRepository).isNotNull();
     }
 
     /**
@@ -176,8 +182,8 @@ class GroupTest {
     @Test
     public void deleteStudentFromGroup_Test() throws Exception {
 
-        JwtResponse jwtResponse = tokenUtils.makeAuth(usernameAdmin, passwordAdmin);
-        tokenUtils.makeToken(usernameAdmin, jwtResponse.getAccessToken());
+        JwtResponse jwtResponse = tokenUtils.makeAuth(usernameTeacher, passwordTeacher);
+        tokenUtils.makeToken(usernameTeacher, jwtResponse.getAccessToken());
 
         this.mockMvc.perform(post("/api/auth/groups/students/" + 999 + "/" + 3)
                 .header("Authorization", "Bearer " + jwtResponse.getAccessToken()))
@@ -190,6 +196,23 @@ class GroupTest {
                 .andExpect(jsonPath("message").value("Student deleted successfully!"));
 
         Assert.assertFalse(groupRepository.findById(999).get().getUsers().contains(userRepository.findById(3).get()));
+    }
+
+    @Test
+    public void createLesson_Test() throws Exception {
+
+        JwtResponse jwtResponse = tokenUtils.makeAuth(usernameAdmin, passwordAdmin);
+        tokenUtils.makeToken(usernameAdmin, jwtResponse.getAccessToken());
+
+        this.mockMvc.perform(post("/api/auth/groups/" + 999 + "/lesson")
+                .header("Authorization", "Bearer " + jwtResponse.getAccessToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ \"name\": \"Lesson Test\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("message").value("Lesson created successfully!"));
+
+        Assert.assertEquals("Lesson Test", groupRepository.findById(999).get().getJournal().getLessons().stream().findFirst().get().getName());
+        Assert.assertEquals(999, lessonRepository.findByName("Lesson Test").get().getJournal().getGroup().getGroupNum().intValue());
     }
 
 }

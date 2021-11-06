@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface LessonRepository extends JpaRepository<Lesson, Integer> {
     Optional<Lesson> findById(Integer lessonId);
+    Optional<Lesson> findByName(String name);
 }

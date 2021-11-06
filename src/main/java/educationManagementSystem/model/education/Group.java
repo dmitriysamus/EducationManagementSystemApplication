@@ -36,10 +36,15 @@ public class Group {
     @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<User> users = new HashSet<>();
 
-    @OneToOne(fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.EAGER, orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Journal journal;
 
     public Group(Integer groupNum) {
         this.groupNum = groupNum;
     }
-}
+
+    public void addJournal (Journal journal) {
+        this.journal = journal;
+        journal.setGroup(this);
+    }
+ }

@@ -22,7 +22,11 @@ public class Journal {
     @OneToOne(fetch = FetchType.EAGER, orphanRemoval = true)
     private Group group;
 
-    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     Set<Lesson> lessons = new HashSet<>();
 
+    public void addLesson (Lesson lesson) {
+        this.lessons.add(lesson);
+        lesson.setJournal(this);
+    }
 }
