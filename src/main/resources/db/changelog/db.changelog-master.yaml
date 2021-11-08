@@ -1,11 +1,11 @@
 databaseChangeLog:
   - include:
-      file: db/changelog/changeset/v2/drop_v2.sql
+      file: db/changelog/changeset/drop_v1.sql
   - include:
-      file: db/changelog/changeset/v2/create_v2.sql
+      file: db/changelog/changeset/create_v1.sql
   - include:
-      file: db/changelog/changeset/v2/alter_v2.sql
+      file: db/changelog/changeset/alter_v1.sql
   - include:
-      file: db/changelog/changeset/v2/roles_v1.sql
+      file: db/changelog/changeset/roles_v1.sql
   - include:
-      file: db/changelog/changeset/v1/admin_v3.sql
+      file: db/changelog/changeset/admin_v1.sql
