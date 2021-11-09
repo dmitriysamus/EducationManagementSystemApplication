@@ -17,7 +17,7 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQL9Dialect
     hibernate:
       ddl-auto: validate  #//!!!!
-    show-sql: true
+    show-sql: false
 
 habatoo:
   app:
