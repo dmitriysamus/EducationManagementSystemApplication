@@ -372,7 +372,7 @@ class UserTest {
                         .header("Authorization", "Bearer " + jwtResponse.getAccessToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("message").value(
-                        "Tokens with expiry date was deleted successfully!"));
+                        "Tokens with expiry date and inactive status was deleted successfully!"));
 
         Assert.assertEquals(1, tokenRepository.findAll().size());
     }
