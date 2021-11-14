@@ -1,39 +1,31 @@
 package educationManagementSystem.controllers;
 
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-
 import educationManagementSystem.model.ERole;
 import educationManagementSystem.model.Role;
 import educationManagementSystem.model.Token;
 import educationManagementSystem.model.user.User;
 import educationManagementSystem.payload.request.LoginRequest;
 import educationManagementSystem.payload.request.SignupRequest;
+import educationManagementSystem.payload.responce.JwtResponse;
+import educationManagementSystem.payload.responce.MessageResponse;
+import educationManagementSystem.repository.RoleRepository;
 import educationManagementSystem.repository.TokenRepository;
+import educationManagementSystem.repository.UserRepository;
+import educationManagementSystem.security.jwt.JwtUtils;
 import educationManagementSystem.security.jwt.TokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import educationManagementSystem.payload.responce.JwtResponse;
-import educationManagementSystem.payload.responce.MessageResponse;
-import educationManagementSystem.repository.RoleRepository;
-import educationManagementSystem.repository.UserRepository;
-import educationManagementSystem.security.jwt.JwtUtils;
-import educationManagementSystem.security.services.UserDetailsImpl;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -156,8 +148,8 @@ public class AuthController {
     }
 
     /**
-     * @method logoutUser - при http post запросе по адресу .../api/auth/logout
-     * @param request - запрос на выход с параметрами user login+password + токен jwt.
+     * @method logoutUser - при http get запросе по адресу .../api/auth/logout
+     * @param request запрос на выход с параметрами user login+password + токен jwt.
      * возвращает
      * @return {@code ResponseEntity ответ}
      * @see LoginRequest
@@ -167,8 +159,12 @@ public class AuthController {
     public ResponseEntity<?> logoutUser(HttpServletRequest request) {
         String headerAuth = request.getHeader("Authorization");
         String jwt = headerAuth.substring(7, headerAuth.length());
-
         Token unActiveToken = tokenRepository.findByToken(jwt);
+        if (null == unActiveToken) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponse("Token not found!"));
+        }
         unActiveToken.setActive(false);
         tokenRepository.save(unActiveToken);
 

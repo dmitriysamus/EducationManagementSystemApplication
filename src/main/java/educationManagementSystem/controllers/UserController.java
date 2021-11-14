@@ -161,13 +161,14 @@ public class UserController {
     public ResponseEntity<?> clearTokens() {
 
         try {
+            List<Token> tokensByStatus = tokenRepository.findByActiveFalse();
             List<Token> tokens = tokenRepository.findByExpiryDateBefore(LocalDateTime.now());
+            tokens.addAll(tokensByStatus);
             if(tokens.isEmpty()) {
                 return ResponseEntity
                         .badRequest()
                         .body(new MessageResponse("All tokens have valid expiry date!"));
-            }
-            else {
+            } else {
                 for (Token token : tokens) {
                     try { tokenRepository.deleteById(token.getId()); } catch (Exception e) {
                         return ResponseEntity
@@ -175,7 +176,8 @@ public class UserController {
                                 .body(new MessageResponse("Error: Can't delete token!"));
                     }
                 }
-                return ResponseEntity.ok(new MessageResponse("Tokens with expiry date was deleted successfully!"));
+                return ResponseEntity.ok(new MessageResponse(
+                        "Tokens with expiry date and inactive status was deleted successfully!"));
             }
 
         } catch (Exception e) {

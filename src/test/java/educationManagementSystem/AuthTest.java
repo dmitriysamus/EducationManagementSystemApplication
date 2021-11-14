@@ -1,10 +1,6 @@
 package educationManagementSystem;
 
 import educationManagementSystem.controllers.AuthController;
-import educationManagementSystem.controllers.UserController;
-import educationManagementSystem.model.ERole;
-import educationManagementSystem.model.Role;
-import educationManagementSystem.model.Token;
 import educationManagementSystem.model.user.User;
 import educationManagementSystem.payload.responce.JwtResponse;
 import educationManagementSystem.repository.TokenRepository;
@@ -14,7 +10,6 @@ import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,14 +21,11 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Класс AuthTest проводит тестирование методов
@@ -43,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-@TestPropertySource(properties = { "spring.config.location=classpath:application-test.yml" })
+@TestPropertySource(properties = {"spring.config.location=classpath:application-test.yml"})
 @Sql(value = {"/create-user-before.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(value = {"/create-user-after.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class AuthTest {
@@ -55,6 +47,9 @@ public class AuthTest {
 
     @Autowired
     TokenUtils tokenUtils;
+
+    @Autowired
+    private TokenRepository tokenRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -97,7 +92,7 @@ public class AuthTest {
      * возвращает сообщение "User registered successfully!"
      */
     @Test
-    public void createAdmin_Test() throws Exception{
+    public void createAdmin_Test() throws Exception {
         this.mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"username\": \"testmod\", \"email\": \"testmod@mod.com\", \"password\": \"12345\", \"role\": [\"admin\", \"teacher\", \"user\"] }"))
@@ -122,7 +117,7 @@ public class AuthTest {
      * возвращает сообщение "User registered successfully!"
      */
     @Test
-    public void createUser_Test() throws Exception{
+    public void createUser_Test() throws Exception {
         this.mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"username\": \"guest\", \"email\": \"guest@guest.com\", \"password\": \"12345\", \"role\": [\"user\"] }"))
@@ -147,7 +142,7 @@ public class AuthTest {
      * возвращает сообщение "User registered successfully!"
      */
     @Test
-    public void createAdminAndUser_Test() throws Exception{
+    public void createAdminAndUser_Test() throws Exception {
         this.mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"username\": \"admin2\", \"email\": \"admin2@admin2.com\", \"password\": \"12345\", \"role\": [\"admin\"] }"))
@@ -172,7 +167,7 @@ public class AuthTest {
      * возвращает сообщение "Error: Username is already taken!"
      */
     @Test
-    public void createUsernameInDb_Test() throws Exception{
+    public void createUsernameInDb_Test() throws Exception {
         this.mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"username\": \"admin\", \"email\": \"admin2@admin2.com\", \"password\": \"12345\", \"role\": [\"admin\"] }"))
@@ -189,7 +184,7 @@ public class AuthTest {
      * возвращает сообщение "Error: Email is already in use!"
      */
     @Test
-    public void createEmailInDb_Test() throws Exception{
+    public void createEmailInDb_Test() throws Exception {
         this.mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"username\": \"admin2\", \"email\": \"admin@admin.com\", \"password\": \"12345\", \"role\": [\"admin\"] }"))
@@ -206,7 +201,7 @@ public class AuthTest {
      * возвращает сообщение "User registered successfully!"
      */
     @Test
-    public void createRoleNotInDb_Test() throws Exception{
+    public void createRoleNotInDb_Test() throws Exception {
         this.mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"username\": \"cat\", \"email\": \"cat@cat.com\", \"password\": \"12345\", \"role\": [\"cat\"] }"))
@@ -223,7 +218,7 @@ public class AuthTest {
      * возвращает статус isUnauthorized.
      */
     @Test
-    public void loginForbiddenTest_Test() throws Exception{
+    public void loginForbiddenTest_Test() throws Exception {
         this.mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"username\": \"teacher\", \"password\": \"123456\" }"))
@@ -239,14 +234,14 @@ public class AuthTest {
      * возвращает статус isOk.
      */
     @Test
-    public void adminLogin_Test() throws Exception{
+    public void adminLogin_Test() throws Exception {
         this.mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"username\": \"admin\", \"password\": \"12345\" }"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value("admin"))
                 .andExpect(jsonPath("$.email").value("admin@admin.com"))
-                .andExpect((jsonPath("$.roles", Matchers.containsInAnyOrder("ROLE_ADMIN","ROLE_TEACHER", "ROLE_USER"))));
+                .andExpect((jsonPath("$.roles", Matchers.containsInAnyOrder("ROLE_ADMIN", "ROLE_TEACHER", "ROLE_USER"))));
     }
 
     /**
@@ -258,7 +253,7 @@ public class AuthTest {
      * возвращает статус isOk.
      */
     @Test
-    public void userLogin_Test() throws Exception{
+    public void userLogin_Test() throws Exception {
         this.mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{ \"username\": \"user\", \"password\": \"12345\" }"))
@@ -277,11 +272,10 @@ public class AuthTest {
      */
     @Test
     public void logoutFail_Test() throws Exception {
+        String incorrectToken = "incorrectToken";
         this.mockMvc.perform(get("/api/auth/logout")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{ \"token\": \"\" }"))
+                        .header("Authorization", "Bearer " + incorrectToken))
                 .andExpect(status().isUnauthorized());
-
     }
 
     /**
@@ -296,10 +290,11 @@ public class AuthTest {
     @Test
     public void logout_Test() throws Exception {
         JwtResponse jwtResponse = tokenUtils.makeAuth(username, password);
-        tokenUtils.makeToken(username, jwtResponse.getAccessToken());
+        String jwt = jwtResponse.getAccessToken();
+        tokenUtils.makeToken(username, jwt);
 
         this.mockMvc.perform(get("/api/auth/logout")
-                        .header("Authorization", "Bearer " + jwtResponse.getAccessToken()))
+                        .header("Authorization", "Bearer " + jwt))
                 .andExpect(status().is(400))
                 .andExpect(jsonPath("message").value("You are logout."));
     }
