@@ -221,9 +221,21 @@ public class GroupController {
         }
 
         User student = userRepository.findById(studentId).get();
-        users.remove(student);
-        group.setUsers(users);
+        Set<User> newUsers = new HashSet<>();
+
+        users.forEach(user -> {
+            if (user != student) {
+                newUsers.add(user);
+            }
+        });
+
+
+        student.setGroup(null);
+        userRepository.save(student);
+
+        group.setUsers(new HashSet<>(newUsers));
         groupRepository.save(group);
+
         return ResponseEntity.ok(new MessageResponse("Student deleted successfully!"));
 
     }
