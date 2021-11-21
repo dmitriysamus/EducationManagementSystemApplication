@@ -419,12 +419,12 @@ public class GroupController {
 
     /**
      * @method groupList - при http GET запросе по адресу .../api/auth/groups/rates
-     * @return {@code List<user>} - список всех групп.
+     * @return {@code List<user>} - список всех оценок по группам учителя.
      */
     @GetMapping("rates")
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     @ResponseBody
-    public ResponseEntity<?> gradeList(Authentication authentication) {
+    public ResponseEntity<?> gradeListTeacher(Authentication authentication) {
         User teacher = userRepository.findByUsername(authentication.getName()).get();
         List<Object> gradesReturn = new ArrayList<>();
         List<Lesson> lessons = new ArrayList<>();
@@ -445,6 +445,39 @@ public class GroupController {
             temp.put("user_id", grade.getStudent().getId());
             temp.put("grade", grade.getName());
             gradesReturn.add(temp);
+        }
+
+        return ResponseEntity.ok(gradesReturn);
+    }
+
+    /**
+     * @method groupList - при http GET запросе по адресу .../api/auth/groups/rates/student
+     * @return {@code List<user>} - список всех оценок студента.
+     */
+    @GetMapping("rates/student")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @ResponseBody
+    public ResponseEntity<?> gradeListStudent(Authentication authentication) {
+        User student = userRepository.findByUsername(authentication.getName()).get();
+        List<Object> gradesReturn = new ArrayList<>();
+        List<Lesson> lessons = new ArrayList<>();
+        List<Grade> gradesCurrent = new ArrayList<>();
+        Group group = student.getGroup();
+
+        lessons.addAll(group.getJournal().getLessons());
+
+        for(Lesson lesson: lessons) {
+            gradesCurrent.addAll(lesson.getGrades());
+        }
+
+        for(Grade grade: gradesCurrent) {
+            if (grade.getStudent() == student) {
+                Map<String, Object> temp = new HashMap<>();
+                temp.put("lesson", grade.getLesson().getName());
+                temp.put("user_id", grade.getStudent().getId());
+                temp.put("grade", grade.getName());
+                gradesReturn.add(temp);
+            }
         }
 
         return ResponseEntity.ok(gradesReturn);
