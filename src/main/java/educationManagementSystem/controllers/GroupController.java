@@ -11,6 +11,7 @@ import educationManagementSystem.payload.responce.MessageResponse;
 import educationManagementSystem.repository.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -414,5 +415,38 @@ public class GroupController {
         }
 
         return ResponseEntity.ok(groupReturn);
+    }
+
+    /**
+     * @method groupList - при http GET запросе по адресу .../api/auth/groups/rates
+     * @return {@code List<user>} - список всех групп.
+     */
+    @GetMapping("rates")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    @ResponseBody
+    public ResponseEntity<?> gradeList(Authentication authentication) {
+        User teacher = userRepository.findByUsername(authentication.getName()).get();
+        List<Object> gradesReturn = new ArrayList<>();
+        List<Lesson> lessons = new ArrayList<>();
+        List<Grade> gradesCurrent = new ArrayList<>();
+        Set<Group> groups = teacher.getGroups();
+
+        for (Group group: groups) {
+            lessons.addAll(group.getJournal().getLessons());
+        }
+
+        for(Lesson lesson: lessons) {
+            gradesCurrent.addAll(lesson.getGrades());
+        }
+
+        for(Grade grade: gradesCurrent) {
+            Map<String, Object> temp = new HashMap<>();
+            temp.put("lesson", grade.getLesson().getName());
+            temp.put("user_id", grade.getStudent().getId());
+            temp.put("grade", grade.getName());
+            gradesReturn.add(temp);
+        }
+
+        return ResponseEntity.ok(gradesReturn);
     }
 }
