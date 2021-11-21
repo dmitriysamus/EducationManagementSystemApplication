@@ -119,7 +119,8 @@ public class UserController {
         // check ID current user = ID edit user
         if(!(userFromDb.getId() == userRepository.findByUsername(authentication.getName()).get().getId())) {
             // admin check
-            if(userRepository.findByUsername(authentication.getName()).get().getRoles().size() == 3) {
+            if(userRepository.findByUsername(
+                    authentication.getName()).get().getRoles().toString().contains("ROLE_ADMIN")) {
                 return userUtils.checkUserNameAndEmail(user, userFromDb);
             }
             return ResponseEntity

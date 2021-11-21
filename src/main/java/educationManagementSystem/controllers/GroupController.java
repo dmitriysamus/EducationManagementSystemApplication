@@ -154,7 +154,7 @@ public class GroupController {
      * @see ResponseEntity
      */
     @PostMapping("students/{groupNum}/{studentId}")
-    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_USER')")
     public ResponseEntity<?> addStudentToGroup(@PathVariable("groupNum") Integer groupNum, @PathVariable("studentId")  Integer studentId) {
 
         if (!userRepository.existsById(studentId)) {
@@ -204,7 +204,7 @@ public class GroupController {
      * @see ResponseEntity
      */
     @DeleteMapping("students/{groupNum}/{studentId}")
-    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    @PreAuthorize("hasRole('ROLE_TEACHER') or hasRole('ROLE_USER')")
     public ResponseEntity<?> deleteStudentFromGroup(@PathVariable("groupNum") Integer groupNum, @PathVariable("studentId") Integer studentId) {
 
         if (!groupRepository.existsById(groupNum)) {

@@ -22,6 +22,6 @@ spring:
 habatoo:
   app:
     jwtSecret: habatooSecretKeyhabatooSecretKeyhabatooSecretKeyhabatooSecretKeyhabatooSecretKeyhabatooSecretKey
-    jwtExpirationMs: 100500
+    jwtExpirationMs: 1005000
     secretKey: 1234567890123456789012345678901234567890
     remoteAddr: 0:0:0:0:0:0:0:1
