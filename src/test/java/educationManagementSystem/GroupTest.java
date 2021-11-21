@@ -203,6 +203,7 @@ class GroupTest {
                 .andExpect(jsonPath("message").value("Student deleted successfully!"));
 
         Assert.assertEquals("[]", groupRepository.findById(999).get().getUsers().toString());
+        Assert.assertEquals(null, userRepository.findById(3).get().getGroup());
     }
 
     /**

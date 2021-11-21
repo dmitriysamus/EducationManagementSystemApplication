@@ -3,6 +3,7 @@ package educationManagementSystem.controllers;
 import educationManagementSystem.model.ERole;
 import educationManagementSystem.model.Role;
 import educationManagementSystem.model.education.*;
+import educationManagementSystem.model.user.AbstractUser;
 import educationManagementSystem.model.user.User;
 import educationManagementSystem.payload.request.GradeRequest;
 import educationManagementSystem.payload.request.LessonRequest;
@@ -10,11 +11,11 @@ import educationManagementSystem.payload.responce.MessageResponse;
 import educationManagementSystem.repository.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Контроллер работы с группами
@@ -221,9 +222,21 @@ public class GroupController {
         }
 
         User student = userRepository.findById(studentId).get();
-        users.remove(student);
-        group.setUsers(users);
+        Set<User> newUsers = new HashSet<>();
+
+        users.forEach(user -> {
+            if (user != student) {
+                newUsers.add(user);
+            }
+        });
+
+
+        student.setGroup(null);
+        userRepository.save(student);
+
+        group.setUsers(new HashSet<>(newUsers));
         groupRepository.save(group);
+
         return ResponseEntity.ok(new MessageResponse("Student deleted successfully!"));
 
     }
@@ -380,5 +393,93 @@ public class GroupController {
         lessonRepository.save(lesson);
 
         return ResponseEntity.ok(new MessageResponse("Student rated successfully!"));
+    }
+
+    /**
+     * @method groupList - при http GET запросе по адресу .../api/auth/groups
+     * @return {@code List<user>} - список всех групп.
+     */
+    @GetMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_TEACHER') or hasRole('ROLE_USER')")
+    @ResponseBody
+    public ResponseEntity<?> groupList() {
+        List<Object> groupReturn = new ArrayList<>();
+        List<Group> groupCurrent = groupRepository.findAll();
+        for(Group group: groupCurrent) {
+            Map<String, Object> temp = new HashMap<>();
+            temp.put("lessons", group.getJournal().getLessons().stream().map(Lesson::getName).toArray());
+            temp.put("users_id", group.getUsers().stream().map(AbstractUser::getId).toArray());
+            temp.put("teacher_id", group.getTeacher().getId());
+            temp.put("group_num", group.getGroupNum());
+            groupReturn.add(temp);
+        }
+
+        return ResponseEntity.ok(groupReturn);
+    }
+
+    /**
+     * @method groupList - при http GET запросе по адресу .../api/auth/groups/rates
+     * @return {@code List<user>} - список всех оценок по группам учителя.
+     */
+    @GetMapping("rates")
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    @ResponseBody
+    public ResponseEntity<?> gradeListTeacher(Authentication authentication) {
+        User teacher = userRepository.findByUsername(authentication.getName()).get();
+        List<Object> gradesReturn = new ArrayList<>();
+        List<Lesson> lessons = new ArrayList<>();
+        List<Grade> gradesCurrent = new ArrayList<>();
+        Set<Group> groups = teacher.getGroups();
+
+        for (Group group: groups) {
+            lessons.addAll(group.getJournal().getLessons());
+        }
+
+        for(Lesson lesson: lessons) {
+            gradesCurrent.addAll(lesson.getGrades());
+        }
+
+        for(Grade grade: gradesCurrent) {
+            Map<String, Object> temp = new HashMap<>();
+            temp.put("lesson", grade.getLesson().getName());
+            temp.put("user_id", grade.getStudent().getId());
+            temp.put("grade", grade.getName());
+            gradesReturn.add(temp);
+        }
+
+        return ResponseEntity.ok(gradesReturn);
+    }
+
+    /**
+     * @method groupList - при http GET запросе по адресу .../api/auth/groups/rates/student
+     * @return {@code List<user>} - список всех оценок студента.
+     */
+    @GetMapping("rates/student")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @ResponseBody
+    public ResponseEntity<?> gradeListStudent(Authentication authentication) {
+        User student = userRepository.findByUsername(authentication.getName()).get();
+        List<Object> gradesReturn = new ArrayList<>();
+        List<Lesson> lessons = new ArrayList<>();
+        List<Grade> gradesCurrent = new ArrayList<>();
+        Group group = student.getGroup();
+
+        lessons.addAll(group.getJournal().getLessons());
+
+        for(Lesson lesson: lessons) {
+            gradesCurrent.addAll(lesson.getGrades());
+        }
+
+        for(Grade grade: gradesCurrent) {
+            if (grade.getStudent() == student) {
+                Map<String, Object> temp = new HashMap<>();
+                temp.put("lesson", grade.getLesson().getName());
+                temp.put("user_id", grade.getStudent().getId());
+                temp.put("grade", grade.getName());
+                gradesReturn.add(temp);
+            }
+        }
+
+        return ResponseEntity.ok(gradesReturn);
     }
 }
