@@ -3,6 +3,7 @@ package educationManagementSystem.controllers;
 import educationManagementSystem.model.ERole;
 import educationManagementSystem.model.Role;
 import educationManagementSystem.model.education.*;
+import educationManagementSystem.model.user.AbstractUser;
 import educationManagementSystem.model.user.User;
 import educationManagementSystem.payload.request.GradeRequest;
 import educationManagementSystem.payload.request.LessonRequest;
@@ -13,8 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Контроллер работы с группами
@@ -392,5 +392,27 @@ public class GroupController {
         lessonRepository.save(lesson);
 
         return ResponseEntity.ok(new MessageResponse("Student rated successfully!"));
+    }
+
+    /**
+     * @method groupList - при http GET запросе по адресу .../api/auth/groups
+     * @return {@code List<user>} - список всех групп.
+     */
+    @GetMapping
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_TEACHER') or hasRole('ROLE_USER')")
+    @ResponseBody
+    public ResponseEntity<?> groupList() {
+        List<Object> groupReturn = new ArrayList<>();
+        List<Group> groupCurrent = groupRepository.findAll();
+        for(Group group: groupCurrent) {
+            Map<String, Object> temp = new HashMap<>();
+            temp.put("lessons", group.getJournal().getLessons().stream().map(Lesson::getName).toArray());
+            temp.put("users_id", group.getUsers().stream().map(AbstractUser::getId).toArray());
+            temp.put("teacher_id", group.getTeacher().getId());
+            temp.put("group_num", group.getGroupNum());
+            groupReturn.add(temp);
+        }
+
+        return ResponseEntity.ok(groupReturn);
     }
 }
