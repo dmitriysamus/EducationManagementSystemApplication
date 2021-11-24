@@ -7,7 +7,7 @@ databaseChangeLog:
       file: db/changelog/changeset/alter_v1.sql
   - include:
       file: db/changelog/changeset/roles_v1.sql
-  - include:
-      file: db/changelog/changeset/admin_v1.sql
+#  - include:
+#      file: db/changelog/changeset/admin_v1.sql
 #  - include:
 #      file: db/changelog/changeset/admin_v2.sql
